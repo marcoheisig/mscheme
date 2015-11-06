@@ -1,0 +1,30 @@
+#+TITLE: mscheme
+
+mscheme is a scheme interpreter written in pure Matlab.
+
+* History
+  In one of my math lectures, I had to submit several programming exercises in
+  Matlab. In my oppinion, Matlab is not a particulary good programming
+  language - it does not even have a formal standard. Much worse however,
+  there is no full fledged implementation of Matlab in the public domain
+  (Octave is not a drop-in replaceent). Unfortunately this makes Matlab pretty
+  much a dead end when it comes to research in numerical mathematics.
+
+  Instead of whining that I want another programming language for the
+  assignments, I decided to fix things myself and write this little Scheme
+  interpreter. Finally you can write your Matlab assignments in Scheme!
+
+* Standard compliance
+  mscheme aims to be fully R5RS compliant, but currently falls short in a
+  number of cases:
+  - tail recursion
+  - distinction between numeric types
+  - ...
+
+* Testcases
+  #+BEGIN_SRC scheme
+    (set! fib (lambda (x)
+                (if (<= x 2)
+                    1
+                    (+ (fib (- x 1)) (fib (- x 2))))))
+  #+END_SRC
