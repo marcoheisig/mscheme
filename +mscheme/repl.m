@@ -3,10 +3,9 @@
 function repl( )
   env = mscheme.Environment( );
   while true
-    mscheme.print( mscheme.eval( mscheme.read( ), env ) );
-    fprintf( '\n' );
+      mscheme.print( mscheme.eval( mscheme.read( ), env ) );
+      fprintf( '\n' );
     try
-      %%mscheme.print( mscheme.eval( mscheme.read( ), env ) );
     catch error
       if strcmp( error.identifier, 'mscheme:quit' )
         return;

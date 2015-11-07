@@ -33,13 +33,17 @@ function value = read( varargin )
       case '#t'
         value = logical(1);
       case ''''
-        value = mscheme.Cons( mscheme.Symbol( 'quote' ), mscheme.read( port ) );
+        value = mscheme.Cons( mscheme.Symbol( 'quote' ), ...
+                              mscheme.Cons( mscheme.read( port ), mscheme.Null() ) );
       case '`'
-        value = mscheme.Cons( mscheme.Symbol( 'quasiquote' ), mscheme.read( port ) );
+        value = mscheme.Cons( mscheme.Symbol( 'quasiquote' ), ...
+                              mscheme.Cons( mscheme.read( port ), mscheme.Null() ) );
       case ','
-        value = mscheme.Cons( mscheme.Symbol( 'unquote' ), mscheme.read( port ) );
+        value = mscheme.Cons( mscheme.Symbol( 'unquote' ), ...
+                              mscheme.Cons( mscheme.read( port ), mscheme.Null() ) );
       case ',@'
-        value = mscheme.Cons( mscheme.Symbol( 'unquote-splicing' ), mscheme.read( port ) );
+        value = mscheme.Cons( mscheme.Symbol( 'unquote-splicing' ), ...
+                              mscheme.Cons( mscheme.read( port ), mscheme.Null() ) );
       case '('
         value = readList( port );
       case ')'
@@ -67,7 +71,7 @@ function value = readList( port )
     item = mscheme.read( port );
     if strcmp( port.peekToken( ), '.' )
       port.nextToken( );
-      tail = read( port );
+      tail = mscheme.read( port );
       if not( strcmp( port.peekToken( ), ')' ) )
         error( 'A pair must be terminated with ), found %s.', closingParen );
       end
@@ -92,7 +96,7 @@ function value = readVector( port )
       value = mscheme.Vector( data );
       return;
     end
-    data{ index } = read( port );
+    data = { data{:}, mscheme.read( port ) };
     ++ index;
   end
 end
@@ -102,14 +106,14 @@ function value = readArray( port )
   dims = 1;
   while strcmp( port.peekToken( ), '[' )
     port.nextToken( );
-    ++ dims;
+    dims = dims + 1;
   end
   switch dims
     case 1
       i1 = 1;
       while not( strcmp( port.peekToken( ), ']' ) )
-        data( i1 ) = read( port );
-        ++i1;
+        data = [ data, mscheme.read( port ) ];
+        i1 = i1 + 1;
       end
       port.nextToken( );
     case 2
@@ -117,14 +121,14 @@ function value = readArray( port )
       i2 = 1;
       while not( strcmp( port.peekToken( ), ']' ) )
         while not( strcmp( port.peekToken( ), ']' ) )
-          data(i2, i1) = read( port );
-          ++i1;
+          data(i2, i1) = mscheme.read( port );
+          i1 = i1 + 1;
         end
         port.nextToken( );
         if strcmp( port.peekToken( ), '[' )
           i1 = 1;
           port.nextToken( );
-          ++i2;
+          i2 = i2 + 1;
         else
           break;
         end
@@ -133,5 +137,5 @@ function value = readArray( port )
     otherwise
       error('Array is too high-dimensional - sorry.');
   end
-  value = Array( data );
+  value = mscheme.Array( data );
 end

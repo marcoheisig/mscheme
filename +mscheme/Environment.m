@@ -12,38 +12,14 @@ classdef (Sealed) Environment < handle
       if nargin >= 1
         value.table = containers.Map();
         value.parent = varargin{1};
+        %% establish initial bindings
         for i = 2 : nargin
           value.table( varargin{ i } ) = [];
         end
       else
         if ~ isa( toplevel, 'mscheme.Environment' )
           toplevel = mscheme.Environment( false );
-          toplevel.set( 'read', mscheme.NativeProcedure( mscheme.read ) );
-          toplevel.set( 'eval', mscheme.NativeProcedure( mscheme.eval ) );
-          toplevel.set( 'boolean?', mscheme.library( 'boolean_p' ) );
-          toplevel.set( 'symbol?', mscheme.library( 'symbol_p' ) );
-          toplevel.set( 'char?', mscheme.library( 'char_p' ) );
-          toplevel.set( 'port?', mscheme.library( 'port_p' ) );
-          toplevel.set( 'vector?', mscheme.library( 'vector_p' ) );
-          toplevel.set( 'array?', mscheme.library( 'array_p' ) );
-          toplevel.set( 'procedure?', mscheme.library( 'procedure_p' ) );
-          toplevel.set( 'pair?', mscheme.library( 'pair_p' ) );
-          toplevel.set( 'number?', mscheme.library( 'number_p' ) );
-          toplevel.set( 'string?', mscheme.library( 'string_p' ) );
-          toplevel.set( 'null?', mscheme.library( 'null_p' ) );
-          toplevel.set( 'list?', mscheme.library( 'list_p' ) );
-          toplevel.set( 'eq?', mscheme.library( 'eq_p' ) );
-          toplevel.set( 'eqv?', mscheme.library( 'eqv_p' ) );
-          toplevel.set( 'equal?', mscheme.library( 'equal_p' ) );
-          toplevel.set( '+', mscheme.library( 'add' ) );
-          toplevel.set( '*', mscheme.library( 'mul' ) );
-          toplevel.set( '-', mscheme.library( 'sub' ) );
-          toplevel.set( '/', mscheme.library( 'div' ) );
-          toplevel.set( '<', mscheme.library( 'increasing' ) );
-          toplevel.set( '>=', mscheme.library( 'nonincreasing' ) );
-          toplevel.set( '>', mscheme.library( 'decreasing' ) );
-          toplevel.set( '<=', mscheme.library( 'nondecreasing' ) );
-          toplevel.set( '=', mscheme.library( 'numeric_equality' ) );
+          toplevel.init();
         end
         value = toplevel;
       end
@@ -74,6 +50,78 @@ classdef (Sealed) Environment < handle
         env = env.parent;
       end
       this.table( key ) = value;
+    end
+
+    function init( toplevel )
+      t = containers.Map( );
+      t( 'read' ) = mscheme.NativeProcedure( @mscheme.read );
+      t( 'eval' ) = mscheme.NativeProcedure( @mscheme.eval );
+      t( 'load' ) = mscheme.NativeProcedure( @mscheme.load );
+      t( 'boolean?' ) = mscheme.library( 'boolean_p' );
+      t( 'symbol?' ) = mscheme.library( 'symbol_p' );
+      t( 'char?' ) = mscheme.library( 'char_p' );
+      t( 'port?' ) = mscheme.library( 'port_p' );
+      t( 'vector?' ) = mscheme.library( 'vector_p' );
+      t( 'array?' ) = mscheme.library( 'array_p' );
+      t( 'procedure?' ) = mscheme.library( 'procedure_p' );
+      t( 'pair?' ) = mscheme.library( 'pair_p' );
+      t( 'number?' ) = mscheme.library( 'number_p' );
+      t( 'string?' ) = mscheme.library( 'string_p' );
+      t( 'null?' ) = mscheme.library( 'null_p' );
+      t( 'list?' ) = mscheme.library( 'list_p' );
+      t( 'eq?' ) = mscheme.library( 'eq_p' );
+      t( 'eqv?' ) = mscheme.library( 'eqv_p' );
+      t( 'equal?' ) = mscheme.library( 'equal_p' );
+      t( '+' ) = mscheme.library( 'add' );
+      t( '*' ) = mscheme.library( 'mul' );
+      t( '-' ) = mscheme.library( 'sub' );
+      t( '/' ) = mscheme.library( 'div' );
+      t( '<' ) = mscheme.library( 'increasing' );
+      t( '>=' ) = mscheme.library( 'nonincreasing' );
+      t( '>' ) = mscheme.library( 'decreasing' );
+      t( '<=' ) = mscheme.library( 'nondecreasing' );
+      t( '=' ) = mscheme.library( 'numeric_equality' );
+      t( 'min' ) = mscheme.library( 'minimum' );
+      t( 'max' ) = mscheme.library( 'maximum' );
+      t( 'abs' ) = mscheme.library( 'absolute' );
+      t( 'exp' ) = mscheme.library( 'exponent' );
+      t( 'log' ) = mscheme.library( 'logarithm' );
+      t( 'sin' ) = mscheme.library( 'sine' );
+      t( 'cos' ) = mscheme.library( 'cosine' );
+      t( 'tan' ) = mscheme.library( 'tangent' );
+      t( 'asin' ) = mscheme.library( 'arcsine' );
+      t( 'acos' ) = mscheme.library( 'arccosine' );
+      t( 'acos' ) = mscheme.library( 'arctangent' );
+      t( 'sqrt' ) = mscheme.library( 'squareroot' );
+      t( 'expt' ) = mscheme.library( 'power' );
+      t( 'magnitude' ) = mscheme.library( 'magnitude' );
+      t( 'not' ) = mscheme.library( 'not_p' );
+      t( 'cons' ) = mscheme.library( 'cons' );
+
+      t( 'car' ) = mscheme.library( 'car' );
+      t( 'cdr' ) = mscheme.library( 'cdr' );
+
+      t( 'caar' ) = mscheme.library( 'caar' );
+      t( 'cdar' ) = mscheme.library( 'cdar' );
+      t( 'cadr' ) = mscheme.library( 'cadr' );
+      t( 'cddr' ) = mscheme.library( 'cddr' );
+
+      t( 'caaar' ) = mscheme.library( 'caaar' );
+      t( 'cdaar' ) = mscheme.library( 'cdaar' );
+      t( 'cadar' ) = mscheme.library( 'cadar' );
+      t( 'cddar' ) = mscheme.library( 'cddar' );
+      t( 'caadr' ) = mscheme.library( 'caadr' );
+      t( 'cdadr' ) = mscheme.library( 'cdadr' );
+      t( 'caddr' ) = mscheme.library( 'caddr' );
+      t( 'cdddr' ) = mscheme.library( 'cdddr' );
+
+      t( 'set-car!' ) = mscheme.library( 'set_car_f' );
+      t( 'set-cdr!' ) = mscheme.library( 'set_cdr_f' );
+      t( 'list' ) = mscheme.library( 'list' );
+
+      t( 'write' ) = mscheme.library( 'write' );
+      t( 'display' ) = mscheme.library( 'display' );
+      toplevel.table = t;
     end
   end
 end

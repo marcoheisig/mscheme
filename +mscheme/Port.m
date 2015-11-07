@@ -25,13 +25,19 @@ classdef (Sealed) Port < handle
       end
     end
 
+    function close( this )
+      if strcmp( this.type, 'file' )
+        fclose( this.fileID );
+      end
+    end
+
     function value = readLine( this )
       switch this.type
         case 'file'
           if feof( this.fileID )
             value = mscheme.EOF();
           else
-            value = fgetl( fileID );
+            value = fgetl( this.fileID );
           end
         case 'string'
           if 0 == length( this.string )
@@ -65,6 +71,8 @@ classdef (Sealed) Port < handle
         if not( isempty( parse{ 1 } ) )
           this.tokens = cellfun( @(x) x(1), parse );
         end
+        %% eliminate empty tokens
+        this.tokens( cellfun(@isempty, this.tokens) ) = [];
         this.tokenIndex = 1;
       end
       value = this.tokens{ this.tokenIndex };

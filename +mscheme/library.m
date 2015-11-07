@@ -57,8 +57,8 @@ end
 
 function value = list_p( x )
   rest = x;
-  while not( null_p( rest ) )
-    if not( pair_p( rest ) )
+  while ~ null_p( rest )
+    if ~ pair_p( rest )
       value = false;
       return;
     else
@@ -121,15 +121,17 @@ end
 function value = add( varargin )
   value = 0;
   for i = 1:nargin
-    value = value + varargin{ i };
+    value = value + unpack_num( varargin{ i } );
   end
+  value = pack_num( value );
 end
 
 function value = mul( varargin )
   value = 1;
   for i = 1:nargin
-    value = value * varargin{ i };
+    value = value * unpack_num( varargin{ i } );
   end
+  value = pack_num( value );
 end
 
 function value = sub( x, varargin )
@@ -139,85 +141,88 @@ function value = sub( x, varargin )
     otherwise
       value = x;
       for i = 1 : length( varargin )
-        value = value - varargin{ i };
+        value = value - unpack_num( varargin{ i } );
       end
   end
+  value = pack_num( value );
 end
 
 function value = div( x, varargin )
   switch nargin
     case 1
-      value = inverse( x );
+      value = inv( unpack_num( x ) );
     otherwise
-      value = x;
-      for i = 1:length( varargin )
-        value = value / varargin{ i };
+      value = unpack_num( x );
+      for i = 1 : length( varargin )
+        value = value / unpack_num( varargin{ i } );
       end
   end
+  value = pack_num( value );
 end
 
 function value = increasing( varargin )
   value = true;
+  varargin = cellfun( @unpack_num, varargin, 'UniformOutput', false );
   for i = 2 : length( varargin )
-    if ~ ( varargin{ i - 1 } < varargin{ i } )
-      value = false;
-      return;
-    end
+    value = value & ( varargin{ i - 1 } < varargin{ i } );
   end
+  value = pack_num( value );
 end
 
 function value = nonincreasing( varargin )
   value = true;
+  varargin = cellfun( @unpack_num, varargin, 'UniformOutput', false );
   for i = 2 : length( varargin )
-    if ( varargin{ i - 1 } < varargin{ i } )
-      value = false;
-      return;
-    end
+    value = value & ( varargin{ i - 1 } >= varargin{ i } );
   end
+  value = pack_num( value );
 end
 
 function value = decreasing( varargin )
   value = true;
+  varargin = cellfun( @unpack_num, varargin, 'UniformOutput', false );
   for i = 2 : length( varargin )
-    if ~ ( varargin{ i - 1 } > varargin{ i } )
-      value = false;
-      return;
-    end
+    value = value & ( varargin{ i - 1 } > varargin{ i } );
   end
+  value = pack_num( value );
 end
 
 function value = nondecreasing( varargin )
   value = true;
+  varargin = cellfun( @unpack_num, varargin, 'UniformOutput', false );
   for i = 2 : length( varargin )
-    if ( varargin{ i - 1 } > varargin{ i } )
-      value = false;
-      return;
-    end
+    value = value & ( varargin{ i - 1 } <= varargin{ i } );
   end
+  value = pack_num( value );
 end
 
 function value = numeric_equality( varargin )
   value = true;
+  varargin = cellfun( @unpack_num, varargin, 'UniformOutput', false );
   for i = 2 : length( varargin )
-    if ~ ( varargin{ i - 1 } == varargin{ i } )
-      value = false;
-      return;
-    end
+    value = value & ( varargin{ i - 1 } == varargin{ i } );
   end
+  value = pack_num( value );
 end
 
-function value = min( varargin )
-  value = false;
-  %% TODO
+function value = minimum( varargin )
+  value = unpack_num( varargin{ 1 } );
+  for i = 2 : length( varargin )
+    value = min( value, unpack_num( varargin{ i } ) );
+  end
+  value = pack_num( value );
 end
 
-function value = max( varargin )
-  value = false;
-  %% TODO
+function value = maximum( varargin )
+  value = unpack_num( varargin{ 1 } );
+  for i = 2 : length( varargin )
+    value = max( value, unpack_num( varargin{ i } ) );
+  end
+  value = pack_num( value );
 end
 
-function value = abs( x )
-  %% TODO
+function value = absolute( z )
+  value = pack_num( abs( unpack_num( z ) ) );
 end
 
 function value = quotient( n1, n2 )
@@ -254,4 +259,230 @@ end
 
 function value = ceiling( x )
   %% TODO
+end
+
+function value = truncate( x )
+  %% TODO
+end
+
+function value = round( x )
+  %% TODO
+end
+
+function value = rationalize( x, y )
+  %% TODO
+end
+
+function value = exponent( z )
+  value = pack_num( exp( unpack_num( z ) ) );
+end
+
+function value = logarithm( z )
+  value = pack_num( log( unpack_num( z ) ) );
+end
+
+function value = sine( z )
+  value = pack_num( sin( unpack_num( z ) ) );
+end
+
+function value = cosine( z )
+  value = pack_num( cos( unpack_num( z ) ) );
+end
+
+function value = tangent( z )
+  value = pack_num( tan( unpack_num( z ) ) );
+end
+
+function value = arcsine( z )
+  value = pack_num( asin( unpack_num( z ) ) );
+end
+
+function value = arccosine( z )
+  value = pack_num( acos( unpack_num( z ) ) );
+end
+
+function value = arctangent( z )
+  value = pack_num( atan( unpack_num( z ) ) );
+end
+
+function value = squareroot( z )
+  value = pack_num( sqrt( unpack_num( z ) ) );
+end
+
+function value = power( z1, z2 )
+  value = pack_num( unpack_num( z1 ) ^ unpack_num( z2 ) );
+end
+
+function value = make_rectangular( x1, x2 )
+  %% TODO
+end
+
+function value = make_polar( x3, x4 )
+  %% TODO
+end
+
+function value = real_part( z )
+  %% TODO
+end
+
+function value = imag_part( z )
+  %% TODO
+end
+
+function value = magnitude( z )
+  value = pack_num( abs( unpack_num( z ) ) );
+end
+
+function value = angle( z )
+  %% TODO
+end
+
+function value = exact_to_inexact( z )
+  %% TODO
+end
+
+function value = inexact_to_exact( z )
+  %% TODO
+end
+
+function value = number_to_string( z, varargin )
+  %% TODO
+end
+
+function value = string_to_number( string, varargin )
+  %% TODO
+end
+
+%% helper function - called once on each numeric argument to produce an
+%% argument that can be passed to the builtin math functions.
+function value = unpack_num( value )
+  if isscalar( value ) && ( isnumeric( value ) || islogical( value ) )
+    return;
+  end
+  if isa( value, 'mscheme.Array' )
+    value = value.data;
+    return;
+  end
+  error('Not a numeric Scheme value.');
+end
+
+function value = pack_num( value )
+  if isscalar( value ) && ( isnumeric( value ) || islogical( value ) )
+    return;
+  end
+  if ismatrix( value ) && ~ isscalar( value )
+    value = mscheme.Array( value );
+    return;
+  end
+  error('Not a numeric value.');
+end
+
+%%% Booleans
+
+function value = not_p( obj )
+  if islogical( obj ) && isscalar( obj ) && ~ obj
+    value = false
+  else
+    value = true
+    end
+end
+
+%%% Pairs and Lists
+
+function value = cons( obj1, obj2 )
+  value = mscheme.Cons( obj1, obj2 );
+end
+
+%% TODO The Scheme Standard requires CAR / CDR combinations up to depth 4.
+
+%% depth 1
+function value = car( pair )
+  value = pair.car;
+end
+
+function value = cdr( pair )
+  value = pair.cdr;
+end
+
+%% depth 2
+
+function value = caar( pair )
+  value = pair.car.car;
+end
+
+function value = cadr( pair )
+  value = pair.cdr.car;
+end
+
+function value = cdar( pair )
+  value = pair.car.cdr;
+end
+
+function value = cddr( pair )
+  value = pair.cdr.cdr;
+end
+
+%% depth 3
+
+function value = caaar( pair )
+  value = pair.car.car.car;
+end
+
+function value = cadar( pair )
+  value = pair.car.cdr.car;
+end
+
+function value = cdaar( pair )
+  value = pair.car.car.cdr;
+end
+
+function value = cddar( pair )
+  value = pair.car.cdr.cdr;
+end
+
+function value = caadr( pair )
+  value = pair.cdr.car.car;
+end
+
+function value = caddr( pair )
+  value = pair.cdr.cdr.car;
+end
+
+function value = cdadr( pair )
+  value = pair.cdr.car.cdr;
+end
+
+function value = cdddr( pair )
+  value = pair.cdr.cdr.cdr;
+end
+
+function value = set_car_f( pair, obj )
+  pair.car = obj;
+  value = obj;
+end
+
+function value = set_cdr_f( pair, obj )
+  pair.cdr = obj;
+  value = obj;
+end
+
+function value = list( varargin )
+  value = mscheme.Null();
+  for i = length( varargin ) : -1 : 1
+    value = mscheme.Cons( varargin{ i }, value );
+  end
+end
+
+%%% IO
+
+function value = write( obj ) %% TODO port
+  mscheme.print( obj, true );
+  fprintf( '\n' );
+  value = false;
+end
+
+function value = display( obj ) %% TODO port
+  mscheme.print( obj, false );
+  fprintf( '\n' );
+  value = false;
 end

@@ -37,9 +37,11 @@ function print( x, printReadably )
     fprintf( '"%s"', x.data );
   elseif isa( x, 'mscheme.Char' )
     fprintf( '#\\%s', x.data );
+  elseif isa( x, 'mscheme.EOF' )
+    fprintf( '#<EOF>' );
   elseif isa( x, 'mscheme.Array' )
     data = x.data;
-    if numel( data ) > 100
+    if numel( data ) > 10000
       fprintf( '#<big array>');
     else
       switch ndims( data )
@@ -73,7 +75,9 @@ function print( x, printReadably )
     fprintf( '()' );
   elseif isnumeric( x ) && isscalar( x )
     fprintf( '%g', x ); %% TODO
-  elseif isa( x, 'mscheme.Procedure' ) || isa( x, 'function_handle' )
+  elseif isa( x, 'mscheme.Procedure' ) || ...
+         isa ( x, 'mscheme.NativeProcedure' ) || ...
+         isa( x, 'function_handle' )
     fprintf( '#<procedure>' );
   else
     disp( x );
