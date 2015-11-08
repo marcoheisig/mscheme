@@ -6,6 +6,12 @@ function value = library( name )
   value = mscheme.NativeProcedure( eval(['@', name] ) );
 end
 
+function value = quit( )
+  value = false;
+  errorStruct.message = 'quit';
+  errorStruct.identifier = 'mscheme:quit';
+  error( errorStruct );
+end
 %%% predicates
 
 function value = boolean_p( x )

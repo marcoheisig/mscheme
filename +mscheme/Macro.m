@@ -1,9 +1,12 @@
 %%% Copyright (C) 2015 Marco Heisig - licensed under GPLv3 or later
 
-classdef Macro < mscheme.Procedure
+classdef Macro < handle
+  properties
+    macroFunction
+  end
   methods
-    function value = Macro( params, arity, body, env )
-      value@mscheme.Procedure( params, arity, body, env );
+    function value = Macro( macroFunction )
+      value.macroFunction = macroFunction;
     end
   end
 end

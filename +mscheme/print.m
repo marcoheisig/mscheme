@@ -80,7 +80,6 @@ function print( x, printReadably )
          isa( x, 'function_handle' )
     fprintf( '#<procedure>' );
   else
-    disp( x );
-    fprintf( '#<unknown>' );
+    fprintf( sprintf( '#<unknown-class %s>', class( x ) ) );
   end
 end

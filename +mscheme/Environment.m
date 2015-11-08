@@ -54,9 +54,17 @@ classdef (Sealed) Environment < handle
 
     function init( toplevel )
       t = containers.Map( );
+      t( 'if' ) = mscheme.SpecialForm( 'if' );
+      t( 'quote' ) = mscheme.SpecialForm( 'quote' );
+      t( 'unquote' ) = mscheme.SpecialForm( 'unquote' );
+      t( 'unquote-splicing' ) = mscheme.SpecialForm( 'unquote-splicing' );
+      t( 'set!' ) = mscheme.SpecialForm( 'set!' );
+      t( 'begin' ) = mscheme.SpecialForm( 'begin' );
+      t( 'lambda' ) = mscheme.SpecialForm( 'lambda' );
       t( 'read' ) = mscheme.NativeProcedure( @mscheme.read );
       t( 'eval' ) = mscheme.NativeProcedure( @mscheme.eval );
       t( 'load' ) = mscheme.NativeProcedure( @mscheme.load );
+      t( 'quit' ) = mscheme.library( 'quit' );
       t( 'boolean?' ) = mscheme.library( 'boolean_p' );
       t( 'symbol?' ) = mscheme.library( 'symbol_p' );
       t( 'char?' ) = mscheme.library( 'char_p' );

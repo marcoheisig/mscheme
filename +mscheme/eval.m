@@ -17,89 +17,114 @@ fprintf( 'EVAL: ' );
   end
 
   %% evaluate the S-expression
-  first = x.car;
+  op = mscheme.eval( x.car, env );
   rest  = x.cdr;
   nargs = list_length( rest );
-  if isa( first, 'mscheme.Symbol' )
-    switch first.name
-      case 'quit'
-        errorStruct.message = 'quit';
-        errorStruct.identifier = 'mscheme:quit';
-        error( errorStruct )
-      case 'quote'
-        if nargs ~= 1
-          error('Quote expects one argument, but got %d.', nargs);
-        else
-          value = rest.car;
-          return;
+  switch class( op )
+    case 'mscheme.Macro' %% TODO expands on each invocation
+      expander = op.macroFunction;
+      args = list_to_cell( rest );
+      arity = length( args );
+      backup = cellfun( @( param ) env.lookup( param ), expander.params, 'UniformOutput', false );
+      for i = 1 : arity
+        expander.env.set( expander.params{ i }, args{ i } );
+      end
+      expansion = mscheme.eval( expander.body, expander.env );
+      for i = 1 : arity
+        expander.env.set( expander.params{ i }, backup{ i } );
+      end
+      value = mscheme.eval( expansion, env );
+    case 'mscheme.Procedure'
+      args = cellfun( @( arg ) mscheme.eval( arg, env ), ...
+                      list_to_cell( rest ), ...
+                      'UniformOutput', false );
+      nargs = length( args );
+      arity = abs( op.arity );
+      if op.arity < 0 %% a vararg procedure
+        fixedArgs = arity - 1;
+        if nargs < fixedArgs
+          error( sprintf( 'Expected at least %d arguments but got only %d.', ...
+                          fixedArgs, nargs ) );
         end
-      case 'if'
-        condition = mscheme.eval( rest.car, env );
-        switch nargs
-          case 2
-            then = rest.cdr.car;
-            els = false;
-          case 3
-            then = rest.cdr.car;
-            els  = rest.cdr.cdr.car;
-          otherwise
-            error('Wrong number of clauses in IF statement.');
+        restlist = mscheme.Null();
+        for i = nargs : -1 : fixedArgs + 1
+          restlist = mscheme.Cons( args{ i }, restlist );
         end
-        if ~ ( islogical( obj ) && isscalar( obj ) && ~ obj )
-          value = mscheme.eval( then, env );
-        else
-          value = mscheme.eval( els, env );
+        args = { args{ 1 : fixedArgs }, restlist };
+      else
+        if nargs ~= arity
+          error( sprintf( 'Expected %d arguments but got %d.', ...
+                          arity, nargs ) );
         end
-        return;
-      case 'set!'
-        symbol = rest.car;
-        form = rest.cdr.car;
-        value = mscheme.eval( form, env );
-        env.set( symbol.name, value );
-        return;
-      case 'begin'
-        value =  {};
-        while ~ isa( rest, 'mscheme.Null' )
-          value = mscheme.eval( rest.car, env );
-          rest = rest.cdr;
-        end
-        return;
-      case 'lambda'
-        params = list_to_cell( rest.car );
-        arity = length( params );
-        body = mscheme.Cons( mscheme.Symbol( 'begin' ), rest.cdr );
-        params = cellfun( @( x ) x.name, params, 'UniformOutput', false );
-        value = mscheme.Procedure( params, arity, body, mscheme.Environment( env ) );
-        return;
-    end
-  end %% end of special forms
-  %% ordinary calls
-  f = mscheme.eval( first, env );
-  args = cellfun( @( arg ) mscheme.eval( arg, env ), ...
-                  list_to_cell( rest ), ...
-                  'UniformOutput', false );
-  arity = length( args );
-
-  if isa( f, 'function_handle' )
-    args = cellfun( @unpack, args, 'UniformOutput', false );
-    value = pack( f( args{:} ) );
-  elseif isa( f, 'mscheme.NativeProcedure' )
-    value = f.handle( args{:} );
-  elseif isa( f, 'mscheme.Procedure' )
-    %% save
-    backup = cellfun( @( param ) env.lookup( param ), f.params, 'UniformOutput', false );
-    %% bind
-    for i = 1 : arity
-      f.env.set( f.params{ i }, args{ i } );
-    end
-    %% exec
-    value = mscheme.eval( f.body, f.env );
-    %% restore
-    for i = 1 : arity
-      f.env.set( f.params{ i }, backup{ i } );
-    end
-  else
-    error('Invalid function call.');
+      end
+      %% backup current bindings
+      backup = cellfun( @( param ) env.lookup( param ), op.params, 'UniformOutput', false );
+      %% pass arguments
+      for i = 1 : arity
+        op.env.set( op.params{ i }, args{ i } );
+      end
+      %% evaluate function
+      value = mscheme.eval( op.body, op.env );
+      %% restore environment
+      for i = 1 : arity
+        op.env.set( op.params{ i }, backup{ i } );
+      end
+      %% TODO optimize tail calls
+    case 'mscheme.NativeProcedure'
+      args = cellfun( @( arg ) mscheme.eval( arg, env ), ...
+                      list_to_cell( rest ), ...
+                      'UniformOutput', false );
+      value = op.handle( args{:} );
+    case 'function_handle'
+      args = cellfun( @( arg ) unpack( mscheme.eval( arg, env ) ), ...
+                      list_to_cell( rest ), ...
+                      'UniformOutput', false );
+      value = pack( op( args{:} ) );
+    case 'mscheme.SpecialForm'
+      switch op.name
+        case 'quote'
+          if nargs ~= 1
+            error('Quote expects one argument, but got %d.', nargs);
+          else
+            value = rest.car;
+          end
+        case 'if'
+          condition = mscheme.eval( rest.car, env );
+          switch nargs
+            case 2
+              then = rest.cdr.car;
+              els = false;
+            case 3
+              then = rest.cdr.car;
+              els  = rest.cdr.cdr.car;
+            otherwise
+              error('Wrong number of clauses in IF statement.');
+          end
+          if ~ ( islogical( condition ) && isscalar( condition ) && ~ condition )
+            value = mscheme.eval( then, env );
+          else
+            value = mscheme.eval( els, env );
+          end
+        case 'set!' %% TODO: set! should be a macro
+          symbol = rest.car;
+          form = rest.cdr.car;
+          value = mscheme.eval( form, env );
+          env.set( symbol.name, value );
+        case 'begin'
+          value =  {};
+          while ~ isa( rest, 'mscheme.Null' )
+            value = mscheme.eval( rest.car, env );
+            rest = rest.cdr;
+          end
+        case 'lambda'
+          [ params, improper ] = list_to_cell( rest.car );
+          arity = length( params ) * ( 1 - 2 * improper ); % switch sign if improper
+          body = mscheme.Cons( mscheme.Symbol( 'begin' ), rest.cdr );
+          params = cellfun( @( p ) p.name, params, 'UniformOutput', false );
+          value = mscheme.Procedure( params, arity, body, mscheme.Environment( env ) );
+      end
+    otherwise
+      error( sprintf('No way to call an object of type %s', class( op ) ) );
   end
 end
 
@@ -115,17 +140,23 @@ function value = list_length( x )
   end
 end
 
-function value = list_to_cell( x )
+function [ value, improper ] = list_to_cell( x )
   value = {};
-  i = 1;
+  improper = false;
   rest = x;
-  while ~ isa( rest, 'mscheme.Null' )
-    if  ~ isa( rest, 'mscheme.Cons' )
-      error('Argument is not a proper list.');
-    end
+  while isa( rest, 'mscheme.Cons' )
     value = { value{:}, rest.car };
     rest = rest.cdr;
-    ++ i;
+  end
+
+  if ~ isa( rest, 'mscheme.Null' )
+    if nargout == 2
+      improper = true;
+      value = { value{:}, rest};
+    else
+      error( 'Encountered an improper list.' );
+      return;
+    end
   end
 end
 
