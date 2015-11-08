@@ -60,7 +60,9 @@ classdef (Sealed) Environment < handle
       t( 'unquote-splicing' ) = mscheme.SpecialForm( 'unquote-splicing' );
       t( 'set!' ) = mscheme.SpecialForm( 'set!' );
       t( 'begin' ) = mscheme.SpecialForm( 'begin' );
+      t( 'macro' ) = mscheme.SpecialForm( 'macro' );
       t( 'lambda' ) = mscheme.SpecialForm( 'lambda' );
+      t( 'apply' ) = mscheme.NativeProcedure( @mscheme.apply );
       t( 'read' ) = mscheme.NativeProcedure( @mscheme.read );
       t( 'eval' ) = mscheme.NativeProcedure( @mscheme.eval );
       t( 'load' ) = mscheme.NativeProcedure( @mscheme.load );

@@ -479,6 +479,18 @@ function value = list( varargin )
   end
 end
 
+function value = list_length( x )
+  value = 0;
+  rest = x;
+  while ~ isa( rest, 'mscheme.Null' )
+    if ~ isa( x, 'mscheme.Cons' )
+      error( 'Applied LENGTH to non-list.' );
+    end
+    rest = rest.cdr;
+    value = value + 1;
+  end
+end
+
 %%% IO
 
 function value = write( obj ) %% TODO port
