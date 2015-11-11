@@ -56,6 +56,7 @@ classdef (Sealed) Environment < handle
       t = containers.Map( );
       t( 'if' ) = mscheme.SpecialForm( 'if' );
       t( 'quote' ) = mscheme.SpecialForm( 'quote' );
+      t( 'quasiquote' ) = mscheme.SpecialForm( 'quasiquote' );
       t( 'unquote' ) = mscheme.SpecialForm( 'unquote' );
       t( 'unquote-splicing' ) = mscheme.SpecialForm( 'unquote-splicing' );
       t( 'set!' ) = mscheme.SpecialForm( 'set!' );
@@ -74,6 +75,7 @@ classdef (Sealed) Environment < handle
       t( 'vector?' ) = mscheme.library( 'vector_p' );
       t( 'array?' ) = mscheme.library( 'array_p' );
       t( 'procedure?' ) = mscheme.library( 'procedure_p' );
+      t( 'macro?' ) = mscheme.library( 'macro_p' );
       t( 'pair?' ) = mscheme.library( 'pair_p' );
       t( 'number?' ) = mscheme.library( 'number_p' );
       t( 'string?' ) = mscheme.library( 'string_p' );
@@ -128,10 +130,15 @@ classdef (Sealed) Environment < handle
       t( 'set-car!' ) = mscheme.library( 'set_car_f' );
       t( 'set-cdr!' ) = mscheme.library( 'set_cdr_f' );
       t( 'list' ) = mscheme.library( 'list' );
+      t( 'length' ) = mscheme.library( 'list_length' );
+      t( 'map' ) = mscheme.library( 'map' );
 
       t( 'write' ) = mscheme.library( 'write' );
       t( 'display' ) = mscheme.library( 'display' );
+      t( 'macro' ) = mscheme.library( 'macro' );
+      t( 'macroexpand-1' ) = mscheme.library( 'macroexpand_1' );
       toplevel.table = t;
+      mscheme.load( '+mscheme/library.scm' );
     end
   end
 end

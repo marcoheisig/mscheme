@@ -43,6 +43,10 @@ function value = procedure_p( x )
           isa( x, 'mscheme.Procedure' )
 end
 
+function value = macro_p( x )
+  value = isa( x, 'mscheme.Macro' );
+end
+
 function value = pair_p( x )
   value = isa( x, 'mscheme.Cons' );
 end
@@ -491,6 +495,17 @@ function value = list_length( x )
   end
 end
 
+function value = map( f, varargin )
+  N = min( cellfun( @list_length, varargin ) );
+  value = mscheme.Null();
+  rest = varargin;
+  for i = N : -1 : 1
+    args = cellfun( @(x) x.car, rest, 'UniformOutput', false );
+    rest = cellfun( @(x) x.cdr, rest, 'UniformOutput', false );
+    value = mscheme.Cons( mscheme.apply( f, args{ : }, mscheme.Null() ), value );
+  end
+end
+
 %%% IO
 
 function value = write( obj ) %% TODO port
@@ -503,4 +518,26 @@ function value = display( obj ) %% TODO port
   mscheme.print( obj, false );
   fprintf( '\n' );
   value = false;
+end
+
+%%% misc
+
+function value = macro( expander )
+  value = mscheme.Macro( expander );
+end
+
+function value = macroexpand_1( form )
+  if ~ isa( form, 'mscheme.Cons' )
+    value = form;
+    return;
+  end
+
+  %% TODO: support macrolet
+  op = mscheme.eval( form.car, mscheme.Environment() );
+  rest = form.cdr;
+  if isa( op, 'mscheme.Macro' )
+    value = mscheme.apply( op.macroFunction, rest );
+  else
+    value = form;
+  end
 end

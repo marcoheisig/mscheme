@@ -1,7 +1,14 @@
 %%% Copyright (C) 2015 Marco Heisig - licensed under GPLv3 or later
 
 function value = load( filename )
-  [ fileID, errmsg ] = fopen( filename.data );
+  switch class( filename )
+    case 'mscheme.String'
+      filename = filename.data;
+    case 'char'
+    otherwise
+      error( 'The procedure load expects an argument of type string' );
+  end
+  [ fileID, errmsg ] = fopen( filename );
   if ~ isempty( errmsg )
     error( errmsg );
   end
