@@ -26,3 +26,18 @@
        ,@forms))
    (map car bindings)
    (map cadr bindings)))
+
+(define-macro (receive parameters expr . body)
+  (let ((initial (map (lambda (x) #f) parameters)))
+    `((lambda ,parameters
+        (bind! ,parameters expr)
+        ,@body)
+      ,@initial)))
+
+(define-macro (unless condition . body)
+  `(if (not ,condition)
+       (begin ,@body)))
+
+(define-macro (when condition . body)
+  `(if ,condition
+       (begin ,@body)))

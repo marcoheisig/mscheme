@@ -49,7 +49,9 @@ function value = apply( proc, varargin )
     case 'function_handle'
       args = cellfun( @( arg ) unpack( arg ), args, ...
                       'UniformOutput', false );
-      value = pack( proc( args{:} ) );
+      N = nargout( proc );
+      [values{1:N}] = proc( args{:} );
+      value = cellfun( @pack, values, 'UniformOutput', false );
     otherwise
       error( 'The first argument to apply cannot be of type %s', class( proc ) );
   end

@@ -70,6 +70,24 @@ function value = eval( x, env )
           body = mscheme.Cons( mscheme.Symbol( 'begin' ), rest.cdr );
           params = cellfun( @( p ) p.name, params, 'UniformOutput', false );
           value = mscheme.Procedure( params, arity, body, mscheme.Environment( env ) );
+        case 'values'
+          forms = mscheme.list_to_cell( rest );
+          value = cellfun( @( form ) mscheme.eval( form, env ), forms, 'UniformOutput', false );
+        case 'bind!'
+          params = mscheme.list_to_cell( rest.car );
+          expr = rest.cdr.car;
+          values = mscheme.eval( expr, env );
+          if ~ iscell( values )
+            error( 'Tried to bind multiple parameters from a function that produces only one.' );
+          end
+          if length( params ) ~= length( values )
+            error( 'Tried to bind %d values to %d arguments.', ...
+                   length( values ), length( params ) );
+          end
+          for i = 1 : length( params )
+            env.set( params{ i }.name, values{ i } );
+          end
+          value = false;
       end
     otherwise
       args = cellfun( @( arg ) mscheme.eval( arg, env ), ...

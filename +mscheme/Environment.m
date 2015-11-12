@@ -61,8 +61,9 @@ classdef (Sealed) Environment < handle
       t( 'unquote-splicing' ) = mscheme.SpecialForm( 'unquote-splicing' );
       t( 'set!' ) = mscheme.SpecialForm( 'set!' );
       t( 'begin' ) = mscheme.SpecialForm( 'begin' );
-      t( 'macro' ) = mscheme.SpecialForm( 'macro' );
       t( 'lambda' ) = mscheme.SpecialForm( 'lambda' );
+      t( 'values' ) = mscheme.SpecialForm( 'values' );
+      t( 'bind!' ) = mscheme.SpecialForm( 'bind!' );
       t( 'apply' ) = mscheme.NativeProcedure( @mscheme.apply );
       t( 'read' ) = mscheme.NativeProcedure( @mscheme.read );
       t( 'eval' ) = mscheme.NativeProcedure( @mscheme.eval );
@@ -77,6 +78,8 @@ classdef (Sealed) Environment < handle
       t( 'procedure?' ) = mscheme.library( 'procedure_p' );
       t( 'macro?' ) = mscheme.library( 'macro_p' );
       t( 'pair?' ) = mscheme.library( 'pair_p' );
+      t( 'atom?' ) = mscheme.library( 'atom_p' );
+      t( 'number?' ) = mscheme.library( 'number_p' );
       t( 'number?' ) = mscheme.library( 'number_p' );
       t( 'string?' ) = mscheme.library( 'string_p' );
       t( 'null?' ) = mscheme.library( 'null_p' );

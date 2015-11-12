@@ -51,6 +51,10 @@ function value = pair_p( x )
   value = isa( x, 'mscheme.Cons' );
 end
 
+function value = atom_p( x )
+  value = ~ isa( x, 'mscheme.Cons' );
+end
+
 function value = number_p( x )
   value = isnumeric( x ) && isscalar( x );
 end
@@ -391,9 +395,9 @@ end
 
 function value = not_p( obj )
   if islogical( obj ) && isscalar( obj ) && ~ obj
-    value = false
+    value = true;
   else
-    value = true
+    value = false;
     end
 end
 
@@ -495,15 +499,26 @@ function value = list_length( x )
   end
 end
 
+function value = nreverse( list )
+end
+
 function value = map( f, varargin )
-  N = min( cellfun( @list_length, varargin ) );
+  lengths = cellfun( @list_length, varargin );
+  N = lengths( 1 );
+  if ~ all( lengths == N )
+    error( 'All input lists to map must have the same length.' );
+  end
   value = mscheme.Null();
   rest = varargin;
-  for i = N : -1 : 1
+  for i = 1 : N
     args = cellfun( @(x) x.car, rest, 'UniformOutput', false );
     rest = cellfun( @(x) x.cdr, rest, 'UniformOutput', false );
     value = mscheme.Cons( mscheme.apply( f, args{ : }, mscheme.Null() ), value );
   end
+end
+
+function value = for_each( f, varargin )
+  value = 1;
 end
 
 %%% IO
