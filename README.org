@@ -1,6 +1,6 @@
 #+TITLE: mscheme
 
-mscheme is a scheme interpreter written in pure Matlab.
+mscheme is a Scheme interpreter written in pure Matlab.
 
 * History
   In one of my math lectures, I had to submit several programming exercises in
@@ -19,12 +19,20 @@ mscheme is a scheme interpreter written in pure Matlab.
   number of cases:
   - tail recursion
   - distinction between numeric types
+  - many library functions
   - ...
 
-* Testcases
+* Examples
   #+BEGIN_SRC scheme
-    (set! fib (lambda (x)
-                (if (<= x 2)
-                    1
-                    (+ (fib (- x 1)) (fib (- x 2))))))
+    (define (square x)
+      (* x y))
+
+    (map square `(1 2 3 4 5))
+
+    (square (* 2 (eye 4)))
+  #+END_SRC
+  #+BEGIN_SRC scheme
+    (define-macro (when condition . body)
+      `(if ,condition
+           (begin ,@body)))
   #+END_SRC
