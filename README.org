@@ -23,6 +23,12 @@ mscheme is a Scheme interpreter written in pure Matlab.
   - ...
 
 * Examples
+  To use mscheme, simply add the =+mscheme/= folder to your Matlab path and
+  type =mscheme.repl()= to get an interactive Scheme session.
+
+  Alternatively you can use =mscheme.load( 'some/file.scm' )= to execute the
+  contents of a Scheme file.
+
   #+BEGIN_SRC scheme
     (define (square x)
       (* x y))

@@ -134,6 +134,8 @@ classdef (Sealed) Environment < handle
       t( 'set-cdr!' ) = mscheme.library( 'set_cdr_f' );
       t( 'list' ) = mscheme.library( 'list' );
       t( 'length' ) = mscheme.library( 'list_length' );
+      t( 'reverse' ) = mscheme.library( 'reverse' );
+      t( 'nreverse' ) = mscheme.library( 'nreverse' );
       t( 'map' ) = mscheme.library( 'map' );
 
       t( 'write' ) = mscheme.library( 'write' );

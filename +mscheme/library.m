@@ -499,7 +499,26 @@ function value = list_length( x )
   end
 end
 
+function value = reverse( list )
+  value = mscheme.Null();
+  rest = list;
+  while ~ isa( rest, 'mscheme.Null' )
+    value = mscheme.Cons( rest.car, value );
+    rest = rest.cdr;
+  end
+end
+
 function value = nreverse( list )
+  predecessor = mscheme.Null();
+  head = mscheme.Null();
+  rest = list;
+  while ~ isa( rest, 'mscheme.Null' )
+    head = rest;
+    rest = head.cdr;
+    head.cdr = predecessor;
+    predecessor = head;
+  end
+  value = head;
 end
 
 function value = map( f, varargin )
@@ -515,6 +534,7 @@ function value = map( f, varargin )
     rest = cellfun( @(x) x.cdr, rest, 'UniformOutput', false );
     value = mscheme.Cons( mscheme.apply( f, args{ : }, mscheme.Null() ), value );
   end
+  value = nreverse( value );
 end
 
 function value = for_each( f, varargin )
