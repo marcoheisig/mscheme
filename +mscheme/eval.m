@@ -75,11 +75,13 @@ function value = eval( x, env )
           value = cellfun( @( form ) mscheme.eval( form, env ), forms, 'UniformOutput', false );
         case 'bind!'
           params = mscheme.list_to_cell( rest.car );
+          N = length( params );
           expr = rest.cdr.car;
-          values = mscheme.eval( expr, env );
-          if ~ iscell( values )
-            error( 'Tried to bind multiple parameters from a function that produces only one.' );
-          end
+          func = mscheme.eval( expr.car, env );
+          args = cellfun( @( arg ) mscheme.eval( arg, env ), ...
+                          mscheme.list_to_cell( expr.cdr ), ...
+                          'UniformOutput', false );
+          [ values{ 1 : N } ] = mscheme.apply_varargout( N, func, args{:}, mscheme.Null() );
           if length( params ) ~= length( values )
             error( 'Tried to bind %d values to %d arguments.', ...
                    length( values ), length( params ) );

@@ -1,6 +1,6 @@
 %%% Copyright (C) 2015 Marco Heisig - licensed under GPLv3 or later
 
-function value = apply( proc, varargin )
+function varargout = apply_varargout( N, proc, varargin )
   rest = mscheme.list_to_cell( varargin{ end } );
   if isempty( rest ) % last argument to apply is the rest list
     args = { varargin{ 1 : end - 1 } };
@@ -37,10 +37,11 @@ function value = apply( proc, varargin )
       backup = cellfun( @( param ) proc.env.lookup( param ), proc.params, 'UniformOutput', false );
 
       %% evaluate function
-      value = mscheme.eval( proc.body, proc.env );
-      if iscell( value )
-        value = value{ 1 }; %% drop multiple arguments
+      values = mscheme.eval( proc.body, proc.env );
+      if ~ iscell( values ) || N ~= length( values )
+        error( 'Received the wrong number of values.' );
       end
+      varargout = values;
 
       %% restore environment
       for i = 1 : arity
@@ -48,12 +49,12 @@ function value = apply( proc, varargin )
       end
     case 'mscheme.NativeProcedure'
       %% all native procedures have only one output argument
-      value = proc.handle( args{ : } );
+      varargout{ 1 } = proc.handle( args{ : } );
     case 'function_handle'
       args = cellfun( @( arg ) mscheme.unpack( arg ), args, ...
                       'UniformOutput', false );
-      N = nargout;
-      value = mscheme.pack( proc( args{:} ) );
+      [ varargout{ 1 : N } ] = proc( args{:} );
+      varargout = cellfun( @mscheme.pack, varargout, 'UniformOutput', false );
     otherwise
       error( 'The first argument to apply cannot be of type %s', class( proc ) );
   end

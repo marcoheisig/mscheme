@@ -11,14 +11,6 @@
          (car signature)
          (cdr signature)))))
 
-(define-macro (define signature . body)
-  ((lambda (name arguments)
-     `(set! ,name
-        (lambda ,arguments
-          ,@body)))
-   (car signature)
-   (cdr signature)))
-
 (define-macro (let bindings . body)
   ((lambda (arguments forms)
      `((lambda ,arguments
@@ -27,10 +19,19 @@
    (map car bindings)
    (map cadr bindings)))
 
+(define-macro (define signature . body)
+  (if (pair? signature)
+      (let ((name (car signature))
+            (arguments (cdr signature)))
+        `(set! ,name
+           (lambda ,arguments ,@body)))
+      (let ((name signature))
+        `(set! ,name ,@body))))
+
 (define-macro (receive parameters expr . body)
   (let ((initial (map (lambda (x) #f) parameters)))
     `((lambda ,parameters
-        (bind! ,parameters expr)
+        (bind! ,parameters ,expr)
         ,@body)
       ,@initial)))
 

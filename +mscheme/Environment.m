@@ -34,8 +34,12 @@ classdef (Sealed) Environment < handle
         end
         env = env.parent;
       end
-      value = eval( ['@', key ], 'false' );
-      if islogical( value )
+      %% check whether a builtin function is available
+      category = exist( key );
+      if category == 2 || ...
+         category == 5
+        value = eval( ['@', key ] );
+      else
         error('Reference to undefined symbol %s', key);
       end
     end

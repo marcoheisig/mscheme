@@ -22,6 +22,9 @@ mscheme is a Scheme interpreter written in pure Matlab.
   - many library functions
   - ...
 
+  As an addition to R5RS you can also call native Matlab functions. Matlab
+  Matrices and Arrays are valid Scheme objects.
+
 * Examples
   To use mscheme, simply add the =+mscheme/= folder to your Matlab path and
   type =mscheme.repl()= to get an interactive Scheme session.
@@ -31,7 +34,7 @@ mscheme is a Scheme interpreter written in pure Matlab.
 
   #+BEGIN_SRC scheme
     (define (square x)
-      (* x y))
+      (* x x))
 
     (map square `(1 2 3 4 5))
 
